@@ -10,7 +10,7 @@ version of `logstash_exporter` to adapt to the minimum supported version of logs
 
 For instance, `logstash_exporter v7.3.0.0` supports a minimum version of logstash 7.3.0, meanwhile `logstash-exporter v5.0.0.0` suppots a minimum version of logstash 5.0.
 
-This version will be also reflected on branch names, being `master` the latest supported version.
+This change will also be reflected on branch names, existing `master` (the latest supported version), `v7.3.0` (>= logstash 7.3.0), and `v5.0.0` (>= logstash 5.0 and < 7.3.0).
 
 ## Usage
 
