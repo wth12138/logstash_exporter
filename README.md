@@ -3,6 +3,15 @@ Prometheus exporter for the metrics available in Logstash since version 5.0.
 
 Continuous integration: [travis](https://travis-ci.org/sequra/logstash_exporter/)
 
+## Version compatibility
+
+As logstash can change API metrics in new versions (which happened on v7.3.0), we decided to change the
+version of `logstash_exporter` to adapt to the minimum supported version of logstash using the first three numbers for compatibility and the latest one as own increasing version.
+
+For instance, `logstash_exporter v7.3.0.0` supports a minimum version of logstash 7.3.0, meanwhile `logstash-exporter v5.0.0.0` suppots a minimum version of logstash 5.0.
+
+This version will be also reflected on branch names, being `master` the latest supported version.
+
 ## Usage
 
 ```bash
@@ -81,6 +90,7 @@ Flags:
 * `logstash_node_queue_max_size_bytes` (counter)
 * `logstash_node_queue_max_unread_events`: queue_max_ (counter)
 * `logstash_node_queue_page_capacity_bytes`: queue_page_capacity_bytes (counter)
+* `logstash_node_dead_letter_queue_size_bytes` (counter)
 * `logstash_node_up`: whether logstash node is up (1) or not (0) (gauge)
 
 ## Integration tests
