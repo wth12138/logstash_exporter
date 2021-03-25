@@ -3,7 +3,6 @@ package collector
 import (
 	"encoding/json"
 	"net/http"
-
 	"github.com/prometheus/common/log"
 )
 
