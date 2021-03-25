@@ -15,7 +15,7 @@ This change will also be reflected on branch names, existing `master` (the lates
 ## Usage
 
 ```bash
-go get github.com/wth12138/logstash_exporter@v0.1.6
+go get github.com/wth12138/logstash_exporter@v0.1.7
 cd $GOPATH/src/github.com/sequra/logstash_exporter
 go run logstash_exporter.go --web.listen-address=:1234 --logstash.endpoint="http://localhost:1235"
 ```
