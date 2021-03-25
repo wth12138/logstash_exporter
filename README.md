@@ -21,11 +21,10 @@ go run logstash_exporter.go --web.listen-address=:1234 --logstash.endpoint="http
 ```
 
 ### Config
-
+- default path = /etc/logstash_exporter/conf.yaml
 ```yaml
 endpoint: http://localhost:9600
-BindAddress: 9199
-
+bindaddress: 9198
 ```
 
 
