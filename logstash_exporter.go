@@ -1,17 +1,19 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	_ "net/http/pprof"
 	"sync"
 	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
-	"github.com/sequra/logstash_exporter/collector"
+	"github.com/wth12138/logstash_exporter/collector"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -31,6 +33,24 @@ type LogstashCollector struct {
 	collectors map[string]collector.Collector
 }
 
+type BaseConf struct {
+	Endpoint    string `yaml:"endpoint"`
+	BindAddress string `yaml:"bindaddress"`
+}
+
+func (c *BaseConf) GetConf() *BaseConf {
+	yamlFile, err := ioutil.ReadFile("conf.yaml")
+	if err != nil {
+		log.Fatalf("yamlFile.Get err   #%v ", err)
+	}
+
+	err = yaml.Unmarshal(yamlFile, c)
+	if err != nil {
+		log.Fatalf("Unmarshal: %v", err)
+	}
+	return c
+}
+
 // NewLogstashCollector register a logstash collector
 func NewLogstashCollector(logstashEndpoint string) (*LogstashCollector, error) {
 	nodeStatsCollector, err := collector.NewNodeStatsCollector(logstashEndpoint)
@@ -43,10 +63,16 @@ func NewLogstashCollector(logstashEndpoint string) (*LogstashCollector, error) {
 		log.Fatalf("Cannot register a new collector: %v", err)
 	}
 
+	HotThreadsCollector, err := collector.NewHotThreadsCollector(logstashEndpoint)
+	if err != nil {
+		log.Fatalf("Cannot register a new collector: %v", err)
+	}	
+
 	return &LogstashCollector{
 		collectors: map[string]collector.Collector{
 			"node": nodeStatsCollector,
 			"info": nodeInfoCollector,
+			"HotThreads": HotThreadsCollector,
 		},
 	}, nil
 }
@@ -112,6 +138,13 @@ func main() {
 	kingpin.Version(version.Print("logstash_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
+
+	if *logstashEndpoint == "http://localhost:9600" && *exporterBindAddress == ":9198" {
+		var c BaseConf
+		c.GetConf()
+		*logstashEndpoint = c.Endpoint
+		*exporterBindAddress = fmt.Sprintf(":%v", c.BindAddress)
+	}
 
 	logstashCollector, err := NewLogstashCollector(*logstashEndpoint)
 	if err != nil {
