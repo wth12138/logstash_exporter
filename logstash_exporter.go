@@ -7,13 +7,16 @@ import (
 	_ "net/http/pprof"
 	"sync"
 	"time"
+	"bufio"
+	"os"
+	"path"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
 	"github.com/wth12138/logstash_exporter/collector"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"	
 )
 
 var (
@@ -28,10 +31,41 @@ var (
 	)
 )
 
+var configfileName = "/etc/logstash_exporter/conf.yaml"
+
 // LogstashCollector collector type
 type LogstashCollector struct {
 	collectors map[string]collector.Collector
 }
+
+func Exists(path string) bool {
+	_, err := os.Stat(path)    
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		return false
+	}
+	return true
+}
+
+func CreateAndWriteConfigFile(configfileName string){
+	os.MkdirAll(path.Dir(configfileName),os.ModePerm)
+	 os.Create(configfileName)
+
+    file, err := os.OpenFile(configfileName, os.O_WRONLY|os.O_CREATE, 0666)
+    if err != nil {
+		panic(err)
+    }
+    
+    defer file.Close()
+	write := bufio.NewWriter(file)
+
+    write.WriteString("endpoint: http://localhost:9600 \n")
+	write.WriteString("bindaddress: 9198 \n")
+    write.Flush()
+}
+
 
 type BaseConf struct {
 	Endpoint    string `yaml:"endpoint"`
@@ -39,7 +73,7 @@ type BaseConf struct {
 }
 
 func (c *BaseConf) GetConf() *BaseConf {
-	yamlFile, err := ioutil.ReadFile("conf.yaml")
+	yamlFile, err := ioutil.ReadFile(configfileName)
 	if err != nil {
 		log.Fatalf("yamlFile.Get err   #%v ", err)
 	}
@@ -138,7 +172,10 @@ func main() {
 	kingpin.Version(version.Print("logstash_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
-
+	if Exists(configfileName) != true {
+		CreateAndWriteConfigFile(configfileName)
+	}
+	
 	if *logstashEndpoint == "http://localhost:9600" && *exporterBindAddress == ":9198" {
 		var c BaseConf
 		c.GetConf()
