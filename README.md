@@ -21,8 +21,17 @@ make
 ./logstash_exporter --web.listen-address=:1234 --logstash.endpoint="http://localhost:1235"
 ```
 
-### Flags
+### Config
 
+```yaml
+endpoint: http://localhost:9600
+BindAddress: 9199
+
+```
+
+
+### Flags
+- flags has  higher priority than config file,but I used to apply yaml file in k8s environment for more convenient
 ```sh
 logstash_exporter --help
 usage: logstash_exporter [<flags>]
@@ -90,6 +99,16 @@ Flags:
 * `logstash_node_queue_max_size_bytes` (counter)
 * `logstash_node_dead_letter_queue_size_bytes` (counter)
 * `logstash_node_up`: whether logstash node is up (1) or not (0) (gauge)
+* `logstash_hotthreads_BusiestThreads` (gauge)
+* `logstash_hotthreads_percentOfCpuTime` (gauge)
+* `logstash_hotthreads_state` (gauge)
+
+### logstash_hotthreads_state
+- Runnable      1
+-	Blocked       2
+-	Waiting       3
+- Timed_Waiting 4
+
 
 ## Integration tests
 In order to execute manual integration tests (to know if certain logstash version is compatible with logstash-exporter), you can follow instructions present on file [integration-tests/README.md](integration-tests/README.md).
